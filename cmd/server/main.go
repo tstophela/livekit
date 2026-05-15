@@ -62,7 +62,7 @@ func main() {
 				Usage: "run in development mode (insecure, disable TLS)",
 			},
 		},
-		Action: startServer,
+		Action:  startServer,
 		Version: service.Version,
 	}
 
@@ -90,7 +90,9 @@ func startServer(c *cli.Context) error {
 	}
 
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	// Also handle SIGHUP so the process can be gracefully stopped by some
+	// process managers (e.g. supervisord) that send SIGHUP before SIGTERM.
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 
 	go func() {
 		sig := <-sigChan
