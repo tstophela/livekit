@@ -90,8 +90,10 @@ func startServer(c *cli.Context) error {
 	}
 
 	sigChan := make(chan os.Signal, 1)
-	// Also handle SIGHUP so the process can be gracefully stopped by some
-	// process managers (e.g. supervisord) that send SIGHUP before SIGTERM.
+	// Handle SIGINT, SIGTERM, SIGQUIT for standard termination.
+	// SIGHUP is also included for process managers (e.g. supervisord) that
+	// send SIGHUP before SIGTERM. Note: this means SIGHUP will not trigger
+	// a config reload — restart the process manually if that is needed.
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 
 	go func() {
