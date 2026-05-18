@@ -99,7 +99,9 @@ func startServer(c *cli.Context) error {
 	go func() {
 		sig := <-sigChan
 		logger.Infow("received signal, shutting down", "signal", sig)
-		server.Stop(false)
+		// Use graceful shutdown (true) so in-progress sessions are not abruptly
+		// dropped. Participants will have time to cleanly disconnect.
+		server.Stop(true)
 	}()
 
 	return server.Start()
